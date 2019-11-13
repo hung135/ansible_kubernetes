@@ -1,0 +1,66 @@
+---
+- hosts: pi_kube_worker
+  user: pi
+
+  tasks:  
+    - name: Run command
+      command: hostnamectl set-hostname '{{ ansible_host.replace(".","-") }}'
+      become: yes
+# Change the hostname
+    - name: Run command
+      command: hostnamectl --transient set-hostname {{ ansible_host.replace(".","-") }}
+    - name: Run command
+      command: hostnamectl --static set-hostname {{ ansible_host.replace(".","-") }}
+    - name: Run command
+      become: yes
+      command: hostnamectl --pretty set-hostname {{ ansible_host.replace(".","-") }}
+    - name: Run command
+      become: yes
+      command: echo {{ ansible_host.replace(".","-") }} >/etc/hosts
+
+    - name: Copy file with owner and permissions
+      copy:
+        src: global_hosts_file
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: '0644'
+  
+
+    - name: Copy file with owner and permissions
+      copy:
+        src: pi_install_kub.sh
+        dest: /root/install_kube.sh
+        owner: root
+        group: root
+        mode: '0744'
+
+
+    - name: Run command
+      command: /root/install_kube.sh
+
+
+
+
+    - name: Run command
+      command: systemctl stop kubelet 
+    - name: Run Kubernetes Init
+      command: kubeadm reset -f 
+
+    # - name: Run JOIN Cluster
+    #   command: "{{ join_token }}"
+    - name: Run JOIN CLUSTER w/ ENVAR
+      command: "{{ lookup('env','JOIN_TOKEN') }}"  
+    # - name: Joining the Cluster
+    #   command:
+    #     argv:
+    #       - kubeadm
+    #       - join
+    #       - 192.168.1.3:6443
+    #       - --token 
+    #       - u5r7ze.eudd9f789wt1xdwb 
+    #       - --discovery-token-ca-cert-hash 
+    #       - sha256:8b7fc88828eaf6d31b8b0526c8d89daa34ce7e79e2f63d8df2e8bd28525154c4
+    
+  become: yes 
+  become_user: root

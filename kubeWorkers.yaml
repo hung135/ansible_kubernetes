@@ -1,0 +1,96 @@
+---
+- hosts: centos_kube_worker
+  user: root
+  tasks:
+    # - name: Run command
+    #   command: setenforce 0
+    # - name: Run command disable SELINUX
+    #   command: sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+    # - name: set hosname to '{{ ansible_host }}'
+    #   command: hostnamectl set-hostname '{{ ansible_host }}'
+    - name: Disable firewall 
+      command: systemctl disable firewalld
+    - name: Stop firewall 
+      command: systemctl stop firewalld
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --permanent --add-port=6443/tcp
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --permanent --add-port=2379-62380/tcp
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --permanent --add-port=10250/tcp
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --permanent --add-port=10251/tcp
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --permanent --add-port=10252/tcp
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --permanent --add-port=10255/tcp
+    # - name: Run command firewall-cmd
+    #   command: firewall-cmd --reload
+    # - name: Run command firewall-cmd
+      # command: modprobe br_netfilter
+    # - name: Run command bridge iptables
+    #   command: echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+
+    # - name: Copy global_hosts_file
+    #   copy:
+    #     src: global_hosts_file
+    #     dest: /etc/hosts
+    #     owner: root
+    #     group: root
+    #     mode: '0644'
+    # - name: Copy Kubernetes repo file
+    #   copy:
+    #     src: Kubernetes.repo
+    #     dest: /etc/yum.repos.d/Kubernetes.repo
+    #     owner: root
+    #     group: root
+    #     mode: '0644'
+
+
+    - name: Run Kubernetes Reset
+      command: kubeadm reset -f 
+    - name: Stopping kubelet
+      command: systemctl stop kubelet 
+    - name: Stopping
+      command: systemctl stop docker 
+
+    - name: Clean Up old Crap
+      shell: |
+        rm -rf /var/lib/cni/
+        rm -rf /var/lib/kubelet/*
+        rm -rf /etc/cni/
+        ip link delete cni0
+        ip link delete flannel.1
+    # - name: Run command
+    #   command: setenforce 0
+    # - name: Run command
+    #   command: kubeadm join 192.168.1.3:6443 --token htniiu.fy4us8gh1u9v67mj  --discovery-token-ca-cert-hash sha256:29ad32af20cbff2f5a10fb86a0981c74c7520827a78cdf2de6684cbdca47d5ec
+    - name: Start Docker
+      command: systemctl start docker 
+    # - name: Run JOIN CLUSTER w/ ENVAR
+    #   command: "{{ lookup('env','JOIN_TOKEN') }}"    
+  
+    - name: Run command bridge iptables
+      command: echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+    - name:
+      debug:
+        msg: "{{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
+
+    - name:
+      debug:
+        msg: "[Worker] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
+
+    - name:
+      debug:
+        msg: "[Worker] K8S_TOKEN_HOLDER K8S Hash is  {{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}"
+
+    - name: "Kubeadmn join"
+      shell: |
+        echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+        kubeadm join {{hostvars['K8S_TOKEN_HOLDER']['masternode'] }}:6443 --token={{ hostvars['K8S_TOKEN_HOLDER']['token'] }} --discovery-token-ca-cert-hash sha256:{{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}
+        
+      # shell: >
+      #   {{ hostvars['K8S_TOKEN_HOLDER']['full_cmd'] }}
+    # - name: REBOOOT
+    #   command: reboot  

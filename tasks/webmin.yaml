@@ -1,0 +1,18 @@
+---
+# Debian repo tasks file for webmin
+
+- name: "Debian | Repo | Install Webmin GPG key"
+  apt_key:
+    url: "{{ deb https://download.webmin.com/download/repository sarge contrib }}"
+    state: present
+  when:
+    ansible_os_family == "Debian"
+  tags: [ "webmin", "repo" ]
+
+- name: "Debian | Repo | Install Webmin repository"
+  apt_repository:
+    repo: deb http://download.webmin.com/download/repository sarge contrib
+    state: present
+  when:
+    ansible_os_family == "Debian"
+  tags: [ "webmin", "repo" ]

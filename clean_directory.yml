@@ -1,0 +1,14 @@
+# - name: Capture files to delete
+#   find:
+#     paths: /path/to/directory
+#     file_type: file
+#     excludes: 
+#       - "myfirst.file"
+#       - "mysecond.file"
+#   register: found_files
+
+# - name: Delete files
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   with_items: "{{ found_files['files'] }}"

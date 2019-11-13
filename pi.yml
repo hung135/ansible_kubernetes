@@ -1,0 +1,82 @@
+---
+- hosts: pi
+  user: pi
+  become: yes
+  #become_user: apache
+  #sudo: yes
+  tasks:
+   - name: aptitude 
+     apt: 
+      name: aptitude 
+      state: present 
+
+   - name: Install Nginx
+     apt: pkg=nginx state=present 
+   - name: Remove "aufs-dkms" package
+     apt:
+       name: aufs-dkms 
+       state: absent
+#   - name: Ldap Client
+#     apt: pkg=state=present 
+   - name: Install prerequisites
+     apt:
+       name: ['python3-pip', 'python3-setuptools', 'virtualenv']
+       update_cache: yes
+
+   - name: Install docker-compose
+     pip:
+       name: docker-compose
+- hosts: all
+  user: pi
+  become: yes
+  tasks:
+  - name: Install prerequisites
+    apt:
+      name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2' ,'software-properties-common']
+      update_cache: yes
+
+  - name: Add Docker GPG key
+    apt_key: url=https://download.docker.com/linux/debian/gpg
+
+  - name: Add Docker APT repository
+    apt_repository:
+      repo: deb [arch=armhf] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable
+
+  - name: Install Docker
+    apt:
+      name: docker-ce
+      update_cache: yes
+#  - name: Kubernetes
+#sudo dphys-swapfile swapoff && \
+#sudo dphys-swapfile uninstall && \
+#sudo update-rc.d dphys-swapfile remove
+
+  - name: kub gpg 
+    apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg 
+  - name: Kubernetes APT repository
+    apt_repository:
+      repo: deb https://packages.cloud.google.com/apt kubernetes-xenial main
+
+  - name: install kubernetes
+    apt:
+      name: ['kubeadm']
+      update_cache: yes
+  - name: Add the user 'james' with a bash shell, appending the group 'admins' and 'developers' to the user's groups
+    user:
+      name: pi
+      shell: /bin/bash
+      groups: sudo, docker
+      append: yes
+  - name: Create a login user	
+    user:
+      name: hung
+      #password: copy has of password from shado file 
+      groups: 
+       - docker
+       - sudo
+      state: present
+      shell: /bin/bash       
+      system: no            
+      createhome: yes      
+      home: /home/hung >
+      update_password: always

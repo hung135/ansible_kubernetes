@@ -1,0 +1,16 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.1.2 dual70s
+192.168.1.75 kube-75
+192.168.1.76 kube-76
+192.168.1.77 kube-77
+192.168.1.78 kube-78
+192.168.1.79 kube-79
+192.168.1.80 kube-80
+192.168.1.81 kube-81
+192.168.1.3 k8s-master
+192.168.1.49 pi49
+192.168.1.48 pi48
+192.168.1.47 pi47
+192.168.1.46 pi46
+192.168.1.45 pi45
